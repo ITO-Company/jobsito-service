@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    container_name: cuent_ai_core
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
