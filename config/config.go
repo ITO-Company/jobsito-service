@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ito-company/jobsito-service/config/seed"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -37,7 +38,7 @@ func Load() {
 		if err == nil {
 			log.Printf("Database connected successfully after %d attempt(s)", i+1)
 			Migrate(DB)
-			// seed.Seeder(DB)
+			seed.Seeder(DB)
 			return
 		}
 

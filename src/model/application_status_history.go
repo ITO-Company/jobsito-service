@@ -8,17 +8,15 @@ import (
 )
 
 type ApplicationStatusHistory struct {
-	ID                uuid.UUID `gorm:"type:uuid;primaryKey;"`
-	PreviousStatus       string
-	NewStatus            string
-	Notes                string
-	ChangedById          string
-	ChangeByType         string
+	ID             uuid.UUID `gorm:"type:uuid;primaryKey;"`
+	PreviousStatus string
+	NewStatus      string
+	Notes          string
+	ChangedById    string
+	ChangeByType   string
 
-	ApplicationId uuid.UUID        `gorm:"not null"`
-	Application   Application `gorm:"foreignKey:JobSeekerId;references:ID"`
-
-	
+	ApplicationId uuid.UUID   `gorm:"not null"`
+	Application   Application `gorm:"foreignKey:ApplicationId;references:ID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

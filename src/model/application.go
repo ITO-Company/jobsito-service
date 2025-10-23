@@ -15,9 +15,11 @@ type Application struct {
 	ProposedSalary  string
 	StatusChangedAt string
 
-	// JobPostingId        string
 	JobSeekerId uuid.UUID        `gorm:"not null"`
 	JobSeeker   JobSeekerProfile `gorm:"foreignKey:JobSeekerId;references:ID"`
+
+	JobPostingId uuid.UUID  `gorm:"not null"`
+	JobPosting   JobPosting `gorm:"foreignKey:JobPostingId;references:ID"`
 
 	ApplicationStatusHistory []ApplicationStatusHistory `gorm:"foreignKey:ApplicationId;references:ID"`
 
@@ -25,7 +27,3 @@ type Application struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
-
-
-
-

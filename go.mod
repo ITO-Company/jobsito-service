@@ -3,7 +3,6 @@ module github.com/ito-company/jobsito-service
 go 1.25.2
 
 require (
-	github.com/MetaDandy/cuent-ai-core v0.0.0-20250814010318-2ece4b9cb9a3
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/joho/godotenv v1.5.1
 	gorm.io/driver/postgres v1.6.0
