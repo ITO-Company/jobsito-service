@@ -25,3 +25,7 @@ type Application struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
+
+
+
+
