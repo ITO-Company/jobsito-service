@@ -46,7 +46,7 @@ Hacer un endpoint con paginación y criterios de búsqueda para las etiquetas gl
 
 #### Feature(low): Assign jobseeker tag (jobseeker)
 
-El postulante puede asignarse tags globales y colocarlas en su perfil por medio de la tabla jobseeker tag, también puede quitarse las tags asignadas.a
+El postulante puede asignarse tags globales y colocarlas en su perfil por medio de la tabla jobseeker tag, también puede quitarse las tags asignadas.
 
 ## Offers module
 
