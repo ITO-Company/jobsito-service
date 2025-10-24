@@ -9,7 +9,9 @@ import (
 
 type JobSeekerProfile struct {
 	ID                uuid.UUID `gorm:"type:uuid;primaryKey;"`
-	Name              string
+	Name              string    `gorm:"not null"`
+	Password          string    `gorm:"not null"`
+	Email             string    `gorm:"uniqueIndex;not null"`
 	Bio               string
 	Phone             string
 	Location          string

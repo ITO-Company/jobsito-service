@@ -25,7 +25,6 @@ func JwtMiddleware() fiber.Handler {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 		if err != nil {
@@ -37,6 +36,13 @@ func JwtMiddleware() fiber.Handler {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			c.Locals("user_id", claims["sub"])
 			c.Locals("email", claims["email"])
+			if role, ok := claims["role"].(string); ok {
+				c.Locals("role", role)
+			} else {
+				return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+					"error": "Role claim missing in token",
+				})
+			}
 		} else {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid token claims",
