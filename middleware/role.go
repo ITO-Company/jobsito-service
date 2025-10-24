@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func RequireRole(role string) fiber.Handler {
+func RequireRoleMiddleware(role string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userRole := c.Locals("role")
 		if userRole != role {
