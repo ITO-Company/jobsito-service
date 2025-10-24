@@ -2,13 +2,18 @@ package jobseeker
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/ito-company/jobsito-service/middleware"
 	"github.com/ito-company/jobsito-service/src/dto"
+	"github.com/ito-company/jobsito-service/src/enum"
 )
 
 type JobSeekerHandler interface {
 	RegisterRoutes(router fiber.Router)
 	Signup(c *fiber.Ctx) error
 	Signin(c *fiber.Ctx) error
+	Update(c *fiber.Ctx) error
+	FindByEmail(c *fiber.Ctx) error
+	SoftDelete(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -23,6 +28,11 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	jobSeekerGroup := router.Group("/job-seekers")
 	jobSeekerGroup.Post("/signup", h.Signup)
 	jobSeekerGroup.Post("/signin", h.Signin)
+
+	jobSeekerGroup.Use(middleware.JwtMiddleware())
+	jobSeekerGroup.Patch("/me", h.Update, middleware.RequireRoleMiddleware(string(enum.RoleSeeker)))
+	jobSeekerGroup.Get("/me", h.FindByEmail, middleware.RequireRoleMiddleware(string(enum.RoleSeeker)))
+	jobSeekerGroup.Delete("/me", h.SoftDelete, middleware.RequireRoleMiddleware(string(enum.RoleSeeker)))
 }
 
 func (h *Handler) Signup(c *fiber.Ctx) error {
@@ -63,4 +73,47 @@ func (h *Handler) Signin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token": token,
 	})
+}
+
+func (h *Handler) Update(c *fiber.Ctx) error {
+	var input JobSeekerUpdateDto
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+	}
+
+	email := c.Locals("email").(string)
+
+	updatedJobSeeker, err := h.service.Update(email, input)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(updatedJobSeeker)
+}
+
+func (h *Handler) FindByEmail(c *fiber.Ctx) error {
+	email := c.Locals("email").(string)
+	jobSeeker, err := h.service.FindByEmail(email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(jobSeeker)
+}
+
+func (h *Handler) SoftDelete(c *fiber.Ctx) error {
+	id := c.Locals("user_id").(string)
+	if err := h.service.SoftDelete(id); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusNoContent).JSON(nil)
 }

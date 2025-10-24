@@ -8,11 +8,15 @@ import (
 	"github.com/ito-company/jobsito-service/src/dto"
 	"github.com/ito-company/jobsito-service/src/enum"
 	"github.com/ito-company/jobsito-service/src/model"
+	"github.com/jinzhu/copier"
 )
 
 type JobSeekerService interface {
 	Signup(dto dto.SignupDto) (string, error)
 	Signin(dto dto.SigninDto) (string, error)
+	Update(email string, input JobSeekerUpdateDto) (*JobSeekerResponse, error)
+	FindByEmail(email string) (*JobSeekerResponse, error)
+	SoftDelete(id string) error
 }
 
 type Service struct {
@@ -74,4 +78,40 @@ func (s *Service) Signin(dto dto.SigninDto) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (s *Service) Update(email string, input JobSeekerUpdateDto) (*JobSeekerResponse, error) {
+	jobSeeker, err := s.repo.FindByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("jobseeker not found: %w", err)
+	}
+
+	opt := copier.Option{
+		IgnoreEmpty: true,
+		DeepCopy:    true,
+	}
+
+	if err := copier.CopyWithOption(&jobSeeker, &input, opt); err != nil {
+		return nil, fmt.Errorf("failed to copy data: %w", err)
+	}
+
+	if err := s.repo.Update(jobSeeker); err != nil {
+		return nil, fmt.Errorf("failed to update jobseeker: %w", err)
+	}
+
+	dto := JobSeekerToDto(&jobSeeker)
+	return &dto, nil
+}
+
+func (s *Service) FindByEmail(email string) (*JobSeekerResponse, error) {
+	jobSeeker, err := s.repo.FindByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("jobseeker not found: %w", err)
+	}
+	dto := JobSeekerToDto(&jobSeeker)
+	return &dto, nil
+}
+
+func (s *Service) SoftDelete(id string) error {
+	return s.repo.SoftDelete(id)
 }
