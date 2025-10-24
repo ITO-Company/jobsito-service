@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ito-company/jobsito-service/config/seed"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,14 +28,7 @@ func Load() {
 	}
 
 	maxRetries := 10
-	for i := 0; i < maxRetries; i++ {
-		// dns := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		// 	os.Getenv("DB_HOST"),
-		// 	os.Getenv("DB_USER"),
-		// 	os.Getenv("DB_PASS"),
-		// 	os.Getenv("DB_NAME"),
-		// 	os.Getenv("DB_PORT"),
-		// )
+	for i := range maxRetries {
 		dns := os.Getenv("DATABASE_URL")
 		if dns == "" {
 			log.Fatal("DATABASE_URL not set in .env file")
@@ -44,7 +38,7 @@ func Load() {
 		if err == nil {
 			log.Printf("Database connected successfully after %d attempt(s)", i+1)
 			Migrate(DB)
-			// seed.Seeder(DB)
+			seed.Seeder(DB)
 			return
 		}
 

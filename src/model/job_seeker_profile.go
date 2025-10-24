@@ -8,22 +8,24 @@ import (
 )
 
 type JobSeekerProfile struct {
-	ID                  uuid.UUID `gorm:"type:uuid;primaryKey;"`	
-	Name                string
-	Bio                 string
-	Phone               string
-	Location            string
-	CvUrl               string
-	PortfolioUrl        string
-	ExpectedSalaryMin   string
-	ExpectedSalaryMax   string
-	Availability        string
-	Skills              string
-	Experience          string
-	IsActive            bool
+	ID                uuid.UUID `gorm:"type:uuid;primaryKey;"`
+	Name              string    `gorm:"not null"`
+	Password          string    `gorm:"not null"`
+	Email             string    `gorm:"uniqueIndex;not null"`
+	Bio               string
+	Phone             string
+	Location          string
+	CvUrl             string
+	PortfolioUrl      string
+	ExpectedSalaryMin string
+	ExpectedSalaryMax string
+	Availability      string
+	Skills            string
+	Experience        string
+	IsActive          bool
 
-	Application       []Application `gorm:"foreignKey:JobSeekerProfileID;references:ID"`
-	JobSeekerTags    []JobSeekerTags `gorm:"foreignKey:JobSeekerProfileID;references:ID"`
+	Applications  []Application   `gorm:"foreignKey:JobSeekerId;references:ID"`
+	JobSeekerTags []JobSeekerTags `gorm:"foreignKey:JobSeekerProfileID;references:ID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

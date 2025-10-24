@@ -2,9 +2,10 @@ package api
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/ito-company/jobsito-service/src"
 )
 
-func SetupApi(app *fiber.App) { // c *src.Container
+func SetupApi(app *fiber.App, c *src.Container) {
 	v1 := app.Group("/api/v1")
 
 	app.Get("/", func(ctx *fiber.Ctx) error {
@@ -12,11 +13,8 @@ func SetupApi(app *fiber.App) { // c *src.Container
 	})
 
 	handlers := []func(fiber.Router){
-		// c.ProjectHdl.RegisterRoutes,
-		// c.UserHdl.RegisterRoutes,
-		// c.ScriptHdl.RegisterRoutes,
-		// c.AssetHdl.RegisterRoutes,
-		// c.SubsHdl.RegisterRoutes,
+		c.JobSeekerHandler.RegisterRoutes,
+		c.CompanyHandler.RegisterRoutes,
 	}
 
 	for _, register := range handlers {
