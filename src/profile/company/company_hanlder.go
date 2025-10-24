@@ -2,13 +2,18 @@ package company
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/ito-company/jobsito-service/middleware"
 	"github.com/ito-company/jobsito-service/src/dto"
+	"github.com/ito-company/jobsito-service/src/enum"
 )
 
 type CompanyHandler interface {
 	RegisterRoutes(router fiber.Router)
 	Signup(c *fiber.Ctx) error
 	Signin(c *fiber.Ctx) error
+	Update(c *fiber.Ctx) error
+	SoftDelete(c *fiber.Ctx) error
+	FindByEmail(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -20,8 +25,14 @@ func NewHandler(service CompanyService) CompanyHandler {
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router) {
-	router.Post("/company/signup", h.Signup)
-	router.Post("/company/signin", h.Signin)
+	companyGroup := router.Group("/company")
+	companyGroup.Post("/signup", h.Signup)
+	companyGroup.Post("/signin", h.Signin)
+
+	companyGroup.Use(middleware.JwtMiddleware())
+	companyGroup.Patch("/me", h.Update, middleware.RequireRoleMiddleware(string(enum.RoleCompany)))
+	companyGroup.Get("/me", h.FindByEmail, middleware.RequireRoleMiddleware(string(enum.RoleCompany)))
+	companyGroup.Delete("/me", h.SoftDelete, middleware.RequireRoleMiddleware(string(enum.RoleCompany)))
 }
 
 func (h *Handler) Signup(c *fiber.Ctx) error {
@@ -62,4 +73,49 @@ func (h *Handler) Signin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token": token,
 	})
+}
+
+func (h *Handler) Update(c *fiber.Ctx) error {
+	var input CompanyUpdateDto
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+	}
+
+	email := c.Locals("email").(string)
+
+	updatedCompany, err := h.service.Update(email, input)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(updatedCompany)
+}
+
+func (h *Handler) SoftDelete(c *fiber.Ctx) error {
+	id := c.Locals("user_id").(string)
+
+	if err := h.service.SoftDelete(id); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusNoContent).Send(nil)
+}
+
+func (h *Handler) FindByEmail(c *fiber.Ctx) error {
+	email := c.Locals("email").(string)
+	company, err := h.service.FindByEmail(email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(company)
 }

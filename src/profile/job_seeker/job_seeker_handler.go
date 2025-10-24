@@ -108,8 +108,8 @@ func (h *Handler) FindByEmail(c *fiber.Ctx) error {
 }
 
 func (h *Handler) SoftDelete(c *fiber.Ctx) error {
-	email := c.Locals("email").(string)
-	if err := h.service.SoftDelete(email); err != nil {
+	id := c.Locals("user_id").(string)
+	if err := h.service.SoftDelete(id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
