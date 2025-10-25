@@ -2,6 +2,7 @@ package company
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/ito-company/jobsito-service/helper"
 	"github.com/ito-company/jobsito-service/middleware"
 	"github.com/ito-company/jobsito-service/src/dto"
 	"github.com/ito-company/jobsito-service/src/enum"
@@ -30,9 +31,10 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	companyGroup.Post("/signin", h.Signin)
 
 	companyGroup.Use(middleware.JwtMiddleware())
-	companyGroup.Patch("/me", h.Update, middleware.RequireRoleMiddleware(string(enum.RoleCompany)))
-	companyGroup.Get("/me", h.FindByEmail, middleware.RequireRoleMiddleware(string(enum.RoleCompany)))
-	companyGroup.Delete("/me", h.SoftDelete, middleware.RequireRoleMiddleware(string(enum.RoleCompany)))
+	companyGroup.Get("/", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindAll)
+	companyGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
+	companyGroup.Get("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindByEmail)
+	companyGroup.Delete("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.SoftDelete)
 }
 
 func (h *Handler) Signup(c *fiber.Ctx) error {
@@ -118,4 +120,15 @@ func (h *Handler) FindByEmail(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(company)
+}
+
+func (h *Handler) FindAll(c *fiber.Ctx) error {
+	opts := helper.NewFindAllOptionsFromQuery(c)
+	project, err := h.service.FindAll(opts)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(project)
 }

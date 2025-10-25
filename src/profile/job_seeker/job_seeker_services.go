@@ -17,6 +17,7 @@ type JobSeekerService interface {
 	Update(email string, input JobSeekerUpdateDto) (*JobSeekerResponse, error)
 	FindByEmail(email string) (*JobSeekerResponse, error)
 	SoftDelete(id string) error
+	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[JobSeekerResponse], error)
 }
 
 type Service struct {
@@ -114,4 +115,21 @@ func (s *Service) FindByEmail(email string) (*JobSeekerResponse, error) {
 
 func (s *Service) SoftDelete(id string) error {
 	return s.repo.SoftDelete(id)
+}
+
+func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[JobSeekerResponse], error) {
+	finded, total, err := s.repo.FindAll(opts)
+	if err != nil {
+		return nil, err
+	}
+	dtos := JobSeekerToListDto(finded)
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
+
+	return &helper.PaginatedResponse[JobSeekerResponse]{
+		Data:   dtos,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
 }

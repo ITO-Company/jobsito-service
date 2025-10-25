@@ -1,6 +1,7 @@
 package company
 
 import (
+	"github.com/ito-company/jobsito-service/helper"
 	"github.com/ito-company/jobsito-service/src/model"
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ type CompanyRepo interface {
 	FindByEmail(email string) (*model.CompanyProfile, error)
 	Update(m model.CompanyProfile) error
 	SoftDelete(id string) error
+	FindAll(opts *helper.FindAllOptions) ([]model.CompanyProfile, int64, error)
 }
 
 type Repo struct {
@@ -36,4 +38,14 @@ func (r *Repo) Update(m model.CompanyProfile) error {
 
 func (r *Repo) SoftDelete(id string) error {
 	return r.db.Where("id = ?", id).Delete(&model.CompanyProfile{}).Error
+}
+
+func (r *Repo) FindAll(opts *helper.FindAllOptions) ([]model.CompanyProfile, int64, error) {
+	var finded []model.CompanyProfile
+	query := r.db.Model(model.CompanyProfile{})
+	var total int64
+	query, total = helper.ApplyFindAllOptions(query, opts)
+
+	err := query.Find(&finded).Error
+	return finded, total, err
 }

@@ -17,6 +17,7 @@ type CompanyService interface {
 	Update(email string, input CompanyUpdateDto) (*CompanyResponse, error)
 	SoftDelete(id string) error
 	FindByEmail(email string) (*CompanyResponse, error)
+	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[CompanyResponse], error)
 }
 
 type Service struct {
@@ -114,4 +115,21 @@ func (s *Service) FindByEmail(email string) (*CompanyResponse, error) {
 
 	dto := CompanyToDto(company)
 	return &dto, nil
+}
+
+func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[CompanyResponse], error) {
+	finded, total, err := s.repo.FindAll(opts)
+	if err != nil {
+		return nil, err
+	}
+	dtos := CompanyToListDto(finded)
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
+
+	return &helper.PaginatedResponse[CompanyResponse]{
+		Data:   dtos,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
 }

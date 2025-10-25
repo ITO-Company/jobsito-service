@@ -2,6 +2,7 @@ package jobseeker
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/ito-company/jobsito-service/helper"
 	"github.com/ito-company/jobsito-service/middleware"
 	"github.com/ito-company/jobsito-service/src/dto"
 	"github.com/ito-company/jobsito-service/src/enum"
@@ -14,6 +15,7 @@ type JobSeekerHandler interface {
 	Update(c *fiber.Ctx) error
 	FindByEmail(c *fiber.Ctx) error
 	SoftDelete(c *fiber.Ctx) error
+	FindAll(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -30,9 +32,10 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	jobSeekerGroup.Post("/signin", h.Signin)
 
 	jobSeekerGroup.Use(middleware.JwtMiddleware())
-	jobSeekerGroup.Patch("/me", h.Update, middleware.RequireRoleMiddleware(string(enum.RoleSeeker)))
-	jobSeekerGroup.Get("/me", h.FindByEmail, middleware.RequireRoleMiddleware(string(enum.RoleSeeker)))
-	jobSeekerGroup.Delete("/me", h.SoftDelete, middleware.RequireRoleMiddleware(string(enum.RoleSeeker)))
+	jobSeekerGroup.Get("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAll)
+	jobSeekerGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.Update)
+	jobSeekerGroup.Get("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindByEmail)
+	jobSeekerGroup.Delete("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.SoftDelete)
 }
 
 func (h *Handler) Signup(c *fiber.Ctx) error {
@@ -116,4 +119,15 @@ func (h *Handler) SoftDelete(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusNoContent).JSON(nil)
+}
+
+func (h *Handler) FindAll(c *fiber.Ctx) error {
+	opts := helper.NewFindAllOptionsFromQuery(c)
+	project, err := h.service.FindAll(opts)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(project)
 }
