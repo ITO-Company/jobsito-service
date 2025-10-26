@@ -28,7 +28,10 @@ func (r *Repo) Create(m model.CompanyProfile) error {
 
 func (r *Repo) FindByEmail(email string) (*model.CompanyProfile, error) {
 	var company model.CompanyProfile
-	err := r.db.Where("email = ?", email).First(&company).Error
+	err := r.db.
+		Preload("JobPostings.JobPostingTags.GlobalTag").
+		Where("email = ?", email).
+		First(&company).Error
 	return &company, err
 }
 
