@@ -14,6 +14,7 @@ type JobSeekerHandler interface {
 	Signin(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	FindByEmail(c *fiber.Ctx) error
+	FindById(c *fiber.Ctx) error
 	SoftDelete(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
 }
@@ -33,8 +34,9 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 
 	jobSeekerGroup.Use(middleware.JwtMiddleware())
 	jobSeekerGroup.Get("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAll)
-	jobSeekerGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.Update)
 	jobSeekerGroup.Get("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindByEmail)
+	jobSeekerGroup.Get("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindById)
+	jobSeekerGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.Update)
 	jobSeekerGroup.Delete("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.SoftDelete)
 }
 
@@ -101,6 +103,18 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 func (h *Handler) FindByEmail(c *fiber.Ctx) error {
 	email := c.Locals("email").(string)
 	jobSeeker, err := h.service.FindByEmail(email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(jobSeeker)
+}
+
+func (h *Handler) FindById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	jobSeeker, err := h.service.FindById(id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": err.Error(),

@@ -9,6 +9,7 @@ import (
 type JobSeekerRepo interface {
 	Create(m model.JobSeekerProfile) error
 	FindByEmail(email string) (model.JobSeekerProfile, error)
+	FindById(id string) (model.JobSeekerProfile, error)
 	Update(m model.JobSeekerProfile) error
 	SoftDelete(id string) error
 	FindAll(opts *helper.FindAllOptions) ([]model.JobSeekerProfile, int64, error)
@@ -24,6 +25,12 @@ func NewRepo(db *gorm.DB) JobSeekerRepo {
 
 func (r *Repo) Create(m model.JobSeekerProfile) error {
 	return r.db.Create(&m).Error
+}
+
+func (r *Repo) FindById(id string) (model.JobSeekerProfile, error) {
+	var jobSeeker model.JobSeekerProfile
+	err := r.db.Where("id = ?", id).First(&jobSeeker).Error
+	return jobSeeker, err
 }
 
 func (r *Repo) FindByEmail(email string) (model.JobSeekerProfile, error) {

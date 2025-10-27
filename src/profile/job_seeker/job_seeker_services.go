@@ -16,6 +16,7 @@ type JobSeekerService interface {
 	Signin(dto dto.SigninDto) (string, error)
 	Update(email string, input JobSeekerUpdateDto) (*JobSeekerResponse, error)
 	FindByEmail(email string) (*JobSeekerResponse, error)
+	FindById(id string) (*JobSeekerResponse, error)
 	SoftDelete(id string) error
 	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[JobSeekerResponse], error)
 }
@@ -106,6 +107,15 @@ func (s *Service) Update(email string, input JobSeekerUpdateDto) (*JobSeekerResp
 
 func (s *Service) FindByEmail(email string) (*JobSeekerResponse, error) {
 	jobSeeker, err := s.repo.FindByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("jobseeker not found: %w", err)
+	}
+	dto := JobSeekerToDto(&jobSeeker)
+	return &dto, nil
+}
+
+func (s *Service) FindById(id string) (*JobSeekerResponse, error) {
+	jobSeeker, err := s.repo.FindById(id)
 	if err != nil {
 		return nil, fmt.Errorf("jobseeker not found: %w", err)
 	}
