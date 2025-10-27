@@ -15,6 +15,7 @@ type CompanyHandler interface {
 	Update(c *fiber.Ctx) error
 	SoftDelete(c *fiber.Ctx) error
 	FindByEmail(c *fiber.Ctx) error
+	FindById(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -32,8 +33,9 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 
 	companyGroup.Use(middleware.JwtMiddleware())
 	companyGroup.Get("/", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindAll)
-	companyGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
 	companyGroup.Get("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindByEmail)
+	companyGroup.Get("/:id", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindById)
+	companyGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
 	companyGroup.Delete("/me", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.SoftDelete)
 }
 
@@ -113,6 +115,18 @@ func (h *Handler) SoftDelete(c *fiber.Ctx) error {
 func (h *Handler) FindByEmail(c *fiber.Ctx) error {
 	email := c.Locals("email").(string)
 	company, err := h.service.FindByEmail(email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(company)
+}
+
+func (h *Handler) FindById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	company, err := h.service.FindById(id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": err.Error(),

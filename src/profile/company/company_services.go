@@ -17,6 +17,7 @@ type CompanyService interface {
 	Update(email string, input CompanyUpdateDto) (*dto.CompanyResponse, error)
 	SoftDelete(id string) error
 	FindByEmail(email string) (*dto.CompanyResponse, error)
+	FindById(id string) (*dto.CompanyResponse, error)
 	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.CompanyResponse], error)
 }
 
@@ -109,6 +110,16 @@ func (s *Service) SoftDelete(id string) error {
 
 func (s *Service) FindByEmail(email string) (*dto.CompanyResponse, error) {
 	company, err := s.repo.FindByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	dto := dto.CompanyToDto(company)
+	return &dto, nil
+}
+
+func (s *Service) FindById(id string) (*dto.CompanyResponse, error) {
+	company, err := s.repo.FindById(id)
 	if err != nil {
 		return nil, err
 	}
