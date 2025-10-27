@@ -3,6 +3,7 @@ package jobposting
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/ito-company/jobsito-service/helper"
 	"github.com/ito-company/jobsito-service/src/dto"
 	"github.com/ito-company/jobsito-service/src/model"
@@ -35,10 +36,11 @@ func (s *Service) Create(companyId string, input JobPostingCreateDto) (*dto.JobP
 
 	var job model.JobPosting
 	copier.Copy(&job, &input)
+	job.ID = uuid.New()
 	job.CompanyProfileId = company.ID
 	job.CompanyProfile = *company
 
-	err = s.repo.Create(job)
+	err = s.repo.CreateWithTags(job, input.Tags)
 	if err != nil {
 		return nil, err
 	}

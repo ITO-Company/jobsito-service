@@ -26,6 +26,8 @@ func (r *Repo) Create(m model.CompanyProfile) error {
 	return r.db.Create(&m).Error
 }
 
+// Ver si es eficiente cargar los jobpostings,
+// creo que es mejor un findall de jobposting que se encargue
 func (r *Repo) FindByEmail(email string) (*model.CompanyProfile, error) {
 	var company model.CompanyProfile
 	err := r.db.

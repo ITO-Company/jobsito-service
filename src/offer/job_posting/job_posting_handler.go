@@ -32,6 +32,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 
 	jobPostingGroup.Use(middleware.JwtMiddleware())
 
+	jobPostingGroup.Get("/", h.FindAll)
 	jobPostingGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Create)
 	jobPostingGroup.Patch("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
 	jobPostingGroup.Delete("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.SoftDelete)

@@ -11,8 +11,8 @@ type JobPostingCreateDto struct {
 	WorkType        string    `json:"work_type"`
 	ExperienceLevel string    `json:"experience_level"`
 	Location        string    `json:"location"`
-	IsRemote        string    `json:"is_remote"`
-	IsHibrid        string    `json:"is_hibrid"`
+	IsRemote        bool      `json:"is_remote"`
+	IsHibrid        bool      `json:"is_hibrid"`
 	ContractType    string    `json:"contract_type"`
 	Benefit         string    `json:"benefit"`
 	Status          string    `json:"status"`
@@ -29,8 +29,8 @@ type JobPostingUpdateDto struct {
 	WorkType        *string    `json:"work_type"`
 	ExperienceLevel *string    `json:"experience_level"`
 	Location        *string    `json:"location"`
-	IsRemote        *string    `json:"is_remote"`
-	IsHibrid        *string    `json:"is_hibrid"`
+	IsRemote        *bool      `json:"is_remote"`
+	IsHibrid        *bool      `json:"is_hibrid"`
 	ContractType    *string    `json:"contract_type"`
 	Benefit         *string    `json:"benefit"`
 	Status          *string    `json:"status"`
