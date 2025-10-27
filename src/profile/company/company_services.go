@@ -14,10 +14,10 @@ import (
 type CompanyService interface {
 	Signup(dto dto.SignupDto) (string, error)
 	Signin(dto dto.SigninDto) (string, error)
-	Update(email string, input CompanyUpdateDto) (*CompanyResponse, error)
+	Update(email string, input CompanyUpdateDto) (*dto.CompanyResponse, error)
 	SoftDelete(id string) error
-	FindByEmail(email string) (*CompanyResponse, error)
-	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[CompanyResponse], error)
+	FindByEmail(email string) (*dto.CompanyResponse, error)
+	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.CompanyResponse], error)
 }
 
 type Service struct {
@@ -80,7 +80,7 @@ func (s *Service) Signin(dto dto.SigninDto) (string, error) {
 	return token, nil
 }
 
-func (s *Service) Update(email string, input CompanyUpdateDto) (*CompanyResponse, error) {
+func (s *Service) Update(email string, input CompanyUpdateDto) (*dto.CompanyResponse, error) {
 	company, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func (s *Service) Update(email string, input CompanyUpdateDto) (*CompanyResponse
 		return nil, err
 	}
 
-	dto := CompanyToDto(company)
+	dto := dto.CompanyToDto(company)
 	return &dto, nil
 }
 
@@ -107,25 +107,25 @@ func (s *Service) SoftDelete(id string) error {
 	return s.repo.SoftDelete(id)
 }
 
-func (s *Service) FindByEmail(email string) (*CompanyResponse, error) {
+func (s *Service) FindByEmail(email string) (*dto.CompanyResponse, error) {
 	company, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 
-	dto := CompanyToDto(company)
+	dto := dto.CompanyToDto(company)
 	return &dto, nil
 }
 
-func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[CompanyResponse], error) {
+func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.CompanyResponse], error) {
 	finded, total, err := s.repo.FindAll(opts)
 	if err != nil {
 		return nil, err
 	}
-	dtos := CompanyToListDto(finded)
+	dtos := dto.CompanyToListDto(finded)
 	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
 
-	return &helper.PaginatedResponse[CompanyResponse]{
+	return &helper.PaginatedResponse[dto.CompanyResponse]{
 		Data:   dtos,
 		Total:  total,
 		Limit:  opts.Limit,

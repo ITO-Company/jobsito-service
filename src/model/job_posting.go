@@ -17,8 +17,8 @@ type JobPosting struct {
 	WorkType        string
 	ExperienceLevel string
 	Location        string
-	IsRemote        string
-	IsHibrid        string
+	IsRemote        bool
+	IsHibrid        bool
 	ContractType    string
 	Benefit         string
 	Status          string
