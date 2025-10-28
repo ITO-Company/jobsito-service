@@ -17,6 +17,8 @@ type JobSeekerHandler interface {
 	FindById(c *fiber.Ctx) error
 	SoftDelete(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
+	AddTagToJobSeeker(c *fiber.Ctx) error
+	RemoveTagFromJobSeeker(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -33,11 +35,13 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	jobSeekerGroup.Post("/signin", h.Signin)
 
 	jobSeekerGroup.Use(middleware.JwtMiddleware())
+	jobSeekerGroup.Post("/:tag_id", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.AddTagToJobSeeker)
 	jobSeekerGroup.Get("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAll)
 	jobSeekerGroup.Get("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindByEmail)
 	jobSeekerGroup.Get("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindById)
 	jobSeekerGroup.Patch("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.Update)
 	jobSeekerGroup.Delete("/me", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.SoftDelete)
+	jobSeekerGroup.Delete("/:tag_id", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.RemoveTagFromJobSeeker)
 }
 
 func (h *Handler) Signup(c *fiber.Ctx) error {
@@ -144,4 +148,31 @@ func (h *Handler) FindAll(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(project)
+}
+
+func (h *Handler) AddTagToJobSeeker(c *fiber.Ctx) error {
+	jobseekerId := c.Locals("user_id").(string)
+	tagId := c.Params("tag_id")
+	proficiency := c.Query("proficiency", "")
+
+	if err := h.service.AddTagToJobSeeker(jobseekerId, tagId, proficiency); err != nil {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusNoContent).Send(nil)
+}
+
+func (h *Handler) RemoveTagFromJobSeeker(c *fiber.Ctx) error {
+	jobseekerId := c.Locals("user_id").(string)
+	tagId := c.Params("tag_id")
+
+	if err := h.service.RemoveTagFromJobSeeker(jobseekerId, tagId); err != nil {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusNoContent).Send(nil)
 }

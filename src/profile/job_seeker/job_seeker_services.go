@@ -14,11 +14,13 @@ import (
 type JobSeekerService interface {
 	Signup(dto dto.SignupDto) (string, error)
 	Signin(dto dto.SigninDto) (string, error)
-	Update(email string, input JobSeekerUpdateDto) (*JobSeekerResponse, error)
-	FindByEmail(email string) (*JobSeekerResponse, error)
-	FindById(id string) (*JobSeekerResponse, error)
+	Update(email string, input JobSeekerUpdateDto) (*dto.JobSeekerResponse, error)
+	FindByEmail(email string) (*dto.JobSeekerResponse, error)
+	FindById(id string) (*dto.JobSeekerResponse, error)
 	SoftDelete(id string) error
-	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[JobSeekerResponse], error)
+	FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.JobSeekerResponse], error)
+	AddTagToJobSeeker(jobSeekerId, tagId, proficiency string) error
+	RemoveTagFromJobSeeker(jobSeekerId, tagId string) error
 }
 
 type Service struct {
@@ -82,7 +84,7 @@ func (s *Service) Signin(dto dto.SigninDto) (string, error) {
 	return token, nil
 }
 
-func (s *Service) Update(email string, input JobSeekerUpdateDto) (*JobSeekerResponse, error) {
+func (s *Service) Update(email string, input JobSeekerUpdateDto) (*dto.JobSeekerResponse, error) {
 	jobSeeker, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("jobseeker not found: %w", err)
@@ -101,25 +103,25 @@ func (s *Service) Update(email string, input JobSeekerUpdateDto) (*JobSeekerResp
 		return nil, fmt.Errorf("failed to update jobseeker: %w", err)
 	}
 
-	dto := JobSeekerToDto(&jobSeeker)
+	dto := dto.JobSeekerToDto(&jobSeeker)
 	return &dto, nil
 }
 
-func (s *Service) FindByEmail(email string) (*JobSeekerResponse, error) {
+func (s *Service) FindByEmail(email string) (*dto.JobSeekerResponse, error) {
 	jobSeeker, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("jobseeker not found: %w", err)
 	}
-	dto := JobSeekerToDto(&jobSeeker)
+	dto := dto.JobSeekerToDto(&jobSeeker)
 	return &dto, nil
 }
 
-func (s *Service) FindById(id string) (*JobSeekerResponse, error) {
+func (s *Service) FindById(id string) (*dto.JobSeekerResponse, error) {
 	jobSeeker, err := s.repo.FindById(id)
 	if err != nil {
 		return nil, fmt.Errorf("jobseeker not found: %w", err)
 	}
-	dto := JobSeekerToDto(&jobSeeker)
+	dto := dto.JobSeekerToDto(&jobSeeker)
 	return &dto, nil
 }
 
@@ -127,19 +129,27 @@ func (s *Service) SoftDelete(id string) error {
 	return s.repo.SoftDelete(id)
 }
 
-func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[JobSeekerResponse], error) {
+func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.JobSeekerResponse], error) {
 	finded, total, err := s.repo.FindAll(opts)
 	if err != nil {
 		return nil, err
 	}
-	dtos := JobSeekerToListDto(finded)
+	dtos := dto.JobSeekerToListDto(finded)
 	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
 
-	return &helper.PaginatedResponse[JobSeekerResponse]{
+	return &helper.PaginatedResponse[dto.JobSeekerResponse]{
 		Data:   dtos,
 		Total:  total,
 		Limit:  opts.Limit,
 		Offset: opts.Offset,
 		Pages:  pages,
 	}, nil
+}
+
+func (s *Service) AddTagToJobSeeker(jobSeekerId, tagId, proficiency string) error {
+	return s.repo.AddTagToJobSeeker(jobSeekerId, tagId, proficiency)
+}
+
+func (s *Service) RemoveTagFromJobSeeker(jobSeekerId, tagId string) error {
+	return s.repo.RemoveTagFromJobSeeker(jobSeekerId, tagId)
 }
