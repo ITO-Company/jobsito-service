@@ -17,6 +17,7 @@ type JobPostingHandler interface {
 	AddTagToJobPosting(c *fiber.Ctx) error
 	RemoveTagFromJobPosting(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
+	FindById(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -33,6 +34,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	jobPostingGroup.Use(middleware.JwtMiddleware())
 
 	jobPostingGroup.Get("/", h.FindAll)
+	jobPostingGroup.Get("/:id", h.FindById)
 	jobPostingGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Create)
 	jobPostingGroup.Patch("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
 	jobPostingGroup.Delete("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.SoftDelete)
@@ -157,4 +159,15 @@ func (h *Handler) FindAll(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(finded)
+}
+
+func (h *Handler) FindById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	job, err := h.service.FindById(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(job)
 }

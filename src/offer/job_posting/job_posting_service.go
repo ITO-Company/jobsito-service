@@ -18,6 +18,7 @@ type JobPostingService interface {
 	RemoveTagFromJobPosting(jobPostingId, tagId string) error
 	AuthorizeCompanyAction(companyId string, jobPostingId string) error
 	FindAll(opts *helper.FindAllOptions, tagIDs []string, companyID string) (*helper.PaginatedResponse[dto.JobPostingResponse], error)
+	FindById(id string) (*dto.JobPostingResponse, error)
 }
 
 type Service struct {
@@ -117,4 +118,14 @@ func (s *Service) FindAll(opts *helper.FindAllOptions, tagIDs []string, companyI
 		Offset: opts.Offset,
 		Pages:  pages,
 	}, nil
+}
+
+func (s *Service) FindById(id string) (*dto.JobPostingResponse, error) {
+	job, err := s.repo.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.JobPostingToDto(job)
+	return &response, nil
 }

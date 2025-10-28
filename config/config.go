@@ -37,8 +37,10 @@ func Load() {
 		DB, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
 		if err == nil {
 			log.Printf("Database connected successfully after %d attempt(s)", i+1)
-			Migrate(DB)
-			seed.Seeder(DB)
+			if os.Getenv("AUTO_MIGRATE") == "true" {
+				Migrate(DB)
+				seed.Seeder(DB)
+			}
 			return
 		}
 

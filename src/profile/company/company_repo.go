@@ -9,6 +9,7 @@ import (
 type CompanyRepo interface {
 	Create(m model.CompanyProfile) error
 	FindByEmail(email string) (*model.CompanyProfile, error)
+	FindById(id string) (*model.CompanyProfile, error)
 	Update(m model.CompanyProfile) error
 	SoftDelete(id string) error
 	FindAll(opts *helper.FindAllOptions) ([]model.CompanyProfile, int64, error)
@@ -33,6 +34,14 @@ func (r *Repo) FindByEmail(email string) (*model.CompanyProfile, error) {
 	err := r.db.
 		Preload("JobPostings.JobPostingTags.GlobalTag").
 		Where("email = ?", email).
+		First(&company).Error
+	return &company, err
+}
+
+func (r *Repo) FindById(id string) (*model.CompanyProfile, error) {
+	var company model.CompanyProfile
+	err := r.db.
+		Where("id = ?", id).
 		First(&company).Error
 	return &company, err
 }
