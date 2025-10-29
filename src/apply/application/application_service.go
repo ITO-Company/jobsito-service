@@ -21,7 +21,7 @@ type Service struct {
 	repo ApplicationRepo
 }
 
-func NewApplicationService(repo ApplicationRepo) ApplicationService {
+func NewService(repo ApplicationRepo) ApplicationService {
 	return &Service{repo: repo}
 }
 

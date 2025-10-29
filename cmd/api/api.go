@@ -17,6 +17,7 @@ func SetupApi(app *fiber.App, c *src.Container) {
 		c.CompanyHandler.RegisterRoutes,
 		c.GlobalTagHandler.RegisterRoutes,
 		c.JobPostingHandler.RegisterRoutes,
+		c.ApplicationHandler.RegisterRoutes,
 	}
 
 	for _, register := range handlers {

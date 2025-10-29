@@ -31,9 +31,9 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 
 	applicationGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.Create)
 	applicationGroup.Patch("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
+	applicationGroup.Get("/job-seeker", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindAllByJobSeeker)
+	applicationGroup.Get("/job-posting/:job_posting_id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAllByJobPostingAndCompany)
 	applicationGroup.Get("/:id", h.FindById)
-	applicationGroup.Get("/job-seeker", h.FindAllByJobSeeker)
-	applicationGroup.Get("/job-posting/:job_posting_id/company", h.FindAllByJobPostingAndCompany)
 }
 
 func (h *Handler) Create(c *fiber.Ctx) error {

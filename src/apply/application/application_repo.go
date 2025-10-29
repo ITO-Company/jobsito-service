@@ -35,6 +35,7 @@ func (r *Repo) Update(m *model.Application) error {
 func (r *Repo) FindById(id string) (*model.Application, error) {
 	var application model.Application
 	if err := r.db.
+		Preload("JobSeeker").
 		Where("id = ?", id).
 		First(&application).Error; err != nil {
 		return nil, err
@@ -75,7 +76,8 @@ func (r *Repo) FindAllByJobPostingAndCompany(jobPostingID string, companyID stri
 	var applications []model.Application
 	query := r.db.Model(&model.Application{}).
 		Joins("JOIN job_postings ON job_postings.id = applications.job_posting_id").
-		Where("applications.job_posting_id = ? AND job_postings.company_profile_id = ?", jobPostingID, companyID)
+		Where("applications.job_posting_id = ? AND job_postings.company_profile_id = ?", jobPostingID, companyID).
+		Preload("JobSeeker")
 	query, total := helper.ApplyFindAllOptions(query, opts)
 	err := query.Find(&applications).Error
 	return applications, total, err
