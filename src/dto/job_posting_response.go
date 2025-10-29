@@ -22,6 +22,7 @@ type JobPostingResponse struct {
 	ContractType    string              `json:"contract_type"`
 	Benefit         string              `json:"benefit"`
 	Status          string              `json:"status"`
+	IsClosed        bool                `json:"is_closed"`
 	ExpiresAt       time.Time           `json:"expires_at"`
 	Tags            []GlobalTagResponse `json:"tags,omitempty"`
 }
