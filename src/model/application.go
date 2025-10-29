@@ -14,6 +14,7 @@ type Application struct {
 	CompanyNotes    string
 	ProposedSalary  string
 	StatusChangedAt string
+	IsAccepted      bool
 
 	JobSeekerId uuid.UUID        `gorm:"not null"`
 	JobSeeker   JobSeekerProfile `gorm:"foreignKey:JobSeekerId;references:ID"`

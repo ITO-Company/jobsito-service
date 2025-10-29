@@ -2,6 +2,7 @@ package src
 
 import (
 	"github.com/ito-company/jobsito-service/config"
+	"github.com/ito-company/jobsito-service/src/apply/application"
 	jobposting "github.com/ito-company/jobsito-service/src/offer/job_posting"
 	"github.com/ito-company/jobsito-service/src/profile/company"
 	globaltags "github.com/ito-company/jobsito-service/src/profile/global_tags"
@@ -9,10 +10,11 @@ import (
 )
 
 type Container struct {
-	JobSeekerHandler  jobseeker.JobSeekerHandler
-	CompanyHandler    company.CompanyHandler
-	GlobalTagHandler  globaltags.GlobalTagHandler
-	JobPostingHandler jobposting.JobPostingHandler
+	JobSeekerHandler   jobseeker.JobSeekerHandler
+	CompanyHandler     company.CompanyHandler
+	GlobalTagHandler   globaltags.GlobalTagHandler
+	JobPostingHandler  jobposting.JobPostingHandler
+	ApplicationHandler application.ApplicationHandler
 }
 
 func SetupContainer() *Container {
@@ -32,10 +34,15 @@ func SetupContainer() *Container {
 	jobpostingService := jobposting.NewService(jobpostingRepo)
 	jobpostingHandler := jobposting.NewHandler(jobpostingService)
 
+	applicationRepo := application.NewRepo(config.DB)
+	applicationService := application.NewService(applicationRepo)
+	applicationHandler := application.NewHandler(applicationService)
+
 	return &Container{
-		JobSeekerHandler:  handler,
-		CompanyHandler:    companyHandler,
-		GlobalTagHandler:  globalTagHandler,
-		JobPostingHandler: jobpostingHandler,
+		JobSeekerHandler:   handler,
+		CompanyHandler:     companyHandler,
+		GlobalTagHandler:   globalTagHandler,
+		JobPostingHandler:  jobpostingHandler,
+		ApplicationHandler: applicationHandler,
 	}
 }

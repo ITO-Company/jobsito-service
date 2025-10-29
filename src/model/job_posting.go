@@ -22,6 +22,7 @@ type JobPosting struct {
 	ContractType    string
 	Benefit         string
 	Status          string
+	IsClosed        bool
 	ExpiresAt       time.Time
 
 	CompanyProfileId uuid.UUID      `gorm:"not null"`

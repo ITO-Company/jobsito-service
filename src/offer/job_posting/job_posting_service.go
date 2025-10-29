@@ -40,6 +40,7 @@ func (s *Service) Create(companyId string, input JobPostingCreateDto) (*dto.JobP
 	job.ID = uuid.New()
 	job.CompanyProfileId = company.ID
 	job.CompanyProfile = *company
+	job.IsClosed = false
 
 	err = s.repo.CreateWithTags(job, input.Tags)
 	if err != nil {
