@@ -89,3 +89,45 @@ Se requiere un endpoint para aceptar o rechazar una postulación, si se acepta u
 #### Feature(low): Manage saved jobs (jobseeker)
 
 Se requiere un endpoint para guardar una oferta laboral, y para quitarla de las ofertas guardadas, además de poder visualizar todas las ofertas.
+
+## Interships module
+
+### Interships
+
+#### Feature(high): Select seeker for intership (company)
+
+Se requiere un endpoint que seleccione a una oferta laboral junto al postulante aceptado, para iniciar una pasantia.
+
+#### Feature(high): Complete an intership (company)
+
+Se requiere un endpoint que finalice una pasantia.
+
+#### Feature(mid): View intership profile (jobseeker)
+
+Se requiere un endpoint que muestre el perfil del pasante.
+
+#### Feature(mid): View all interships (company)
+
+Se requiere un endpoint que muestre todas las pasantias activas de una empresa en especifico.
+
+### Milestones and issues
+
+#### Feature(high): New comments
+
+Se requiere crear la nueva tabla asociada a las issues, que sean para comentarios, a su vez se debe agregar atributos como status a las milestones e issues, y un atributo para pedir una revision a una issue
+
+#### Feature(high): Manage milestone (company)
+
+Se requiere hacer un crud de una milestone para un pasante
+
+#### Feature(high): Manage issues (company)
+
+Se requiere un crud para las issues y asignarlas a una milestone
+
+#### Feature(mid): Actions in milestones and issues (job_seeker)
+
+Se requiere los siguientes endpoints para un pasante, visualizar todas sus milestones, visualizar todas las issues asociadas a una milestone, visualizar todas las issues, solicitar la revision de una issue
+
+### Feature(mid): Actions for comments
+
+Se requiere realizar un crud para la tabla de comentarios, donde la empresa y el pasante puedean comentar una issue en comun, para pedir la revision de la issue es necesario realizar un comentario primero.
