@@ -13,8 +13,9 @@ type ApplicationService interface {
 	Create(input *ApplicationCreateDto, jobSeekerID string) (*dto.ApplicationResponse, error)
 	Update(input *ApplicationUpdateDto, applicationID string) (*dto.ApplicationResponse, error)
 	FindByID(id string) (*dto.ApplicationResponse, error)
-	FindAllByJobSeeker(opts *helper.FindAllOptions, jobSeekerID string) ([]dto.ApplicationResponse, error)
-	FindAllByJobPostingAndCompany(opts *helper.FindAllOptions, jobPostingID string, companyID string) ([]dto.ApplicationResponse, error)
+	FindAllByJobSeeker(opts *helper.FindAllOptions, jobSeekerID string) (*helper.PaginatedResponse[dto.ApplicationResponse], error)
+	FindAllByJobPostingAndCompany(opts *helper.FindAllOptions, jobPostingID string, companyID string) (*helper.PaginatedResponse[dto.ApplicationResponse], error)
+	FindAcceptedApplicationsByCompany(opts *helper.FindAllOptions, companyID string) (*helper.PaginatedResponse[dto.JobPostingResponse], error)
 }
 
 type Service struct {
@@ -93,30 +94,55 @@ func (s *Service) FindByID(id string) (*dto.ApplicationResponse, error) {
 	return &dto, nil
 }
 
-func (s *Service) FindAllByJobSeeker(opts *helper.FindAllOptions, jobSeekerID string) ([]dto.ApplicationResponse, error) {
-	applications, _, err := s.repo.FindAllByJobSeeker(jobSeekerID, opts)
+func (s *Service) FindAllByJobSeeker(opts *helper.FindAllOptions, jobSeekerID string) (*helper.PaginatedResponse[dto.ApplicationResponse], error) {
+	applications, total, err := s.repo.FindAllByJobSeeker(jobSeekerID, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	var dtos []dto.ApplicationResponse
-	for _, application := range applications {
-		dtos = append(dtos, dto.ApplicationToDto(&application))
-	}
+	dtos := dto.ApplicationToListDto(applications)
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
 
-	return dtos, nil
+	return &helper.PaginatedResponse[dto.ApplicationResponse]{
+		Data:   dtos,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
 }
 
-func (s *Service) FindAllByJobPostingAndCompany(opts *helper.FindAllOptions, jobPostingID string, companyID string) ([]dto.ApplicationResponse, error) {
-	applications, _, err := s.repo.FindAllByJobPostingAndCompany(jobPostingID, companyID, opts)
+func (s *Service) FindAllByJobPostingAndCompany(opts *helper.FindAllOptions, jobPostingID string, companyID string) (*helper.PaginatedResponse[dto.ApplicationResponse], error) {
+	applications, total, err := s.repo.FindAllByJobPostingAndCompany(jobPostingID, companyID, opts)
+	if err != nil {
+		return nil, err
+	}
+	dtos := dto.ApplicationToListDto(applications)
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
+
+	return &helper.PaginatedResponse[dto.ApplicationResponse]{
+		Data:   dtos,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
+}
+
+func (s *Service) FindAcceptedApplicationsByCompany(opts *helper.FindAllOptions, companyID string) (*helper.PaginatedResponse[dto.JobPostingResponse], error) {
+	jobPostings, total, err := s.repo.FindAcceptedApplicationsByCompany(companyID, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	var dtos []dto.ApplicationResponse
-	for _, application := range applications {
-		dtos = append(dtos, dto.ApplicationToDto(&application))
-	}
+	responses := dto.JobPostingToListDto(jobPostings)
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
 
-	return dtos, nil
+	return &helper.PaginatedResponse[dto.JobPostingResponse]{
+		Data:   responses,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
 }

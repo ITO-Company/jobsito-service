@@ -8,23 +8,24 @@ import (
 )
 
 type JobPostingResponse struct {
-	ID              string              `json:"id"`
-	Title           string              `json:"title"`
-	Description     string              `json:"description"`
-	Requirement     string              `json:"requirement"`
-	SalaryMin       string              `json:"salary_min"`
-	SalaryMax       string              `json:"salary_max"`
-	WorkType        string              `json:"work_type"`
-	ExperienceLevel string              `json:"experience_level"`
-	Location        string              `json:"location"`
-	IsRemote        string              `json:"is_remote"`
-	IsHibrid        string              `json:"is_hibrid"`
-	ContractType    string              `json:"contract_type"`
-	Benefit         string              `json:"benefit"`
-	Status          string              `json:"status"`
-	IsClosed        bool                `json:"is_closed"`
-	ExpiresAt       time.Time           `json:"expires_at"`
-	Tags            []GlobalTagResponse `json:"tags,omitempty"`
+	ID              string                `json:"id"`
+	Title           string                `json:"title"`
+	Description     string                `json:"description"`
+	Requirement     string                `json:"requirement"`
+	SalaryMin       string                `json:"salary_min"`
+	SalaryMax       string                `json:"salary_max"`
+	WorkType        string                `json:"work_type"`
+	ExperienceLevel string                `json:"experience_level"`
+	Location        string                `json:"location"`
+	IsRemote        string                `json:"is_remote"`
+	IsHibrid        string                `json:"is_hibrid"`
+	ContractType    string                `json:"contract_type"`
+	Benefit         string                `json:"benefit"`
+	Status          string                `json:"status"`
+	IsClosed        bool                  `json:"is_closed"`
+	ExpiresAt       time.Time             `json:"expires_at"`
+	Tags            []GlobalTagResponse   `json:"tags,omitempty"`
+	Applications    []ApplicationResponse `json:"applications,omitempty"`
 }
 
 func JobPostingToDto(m *model.JobPosting) JobPostingResponse {
@@ -42,6 +43,15 @@ func JobPostingToDto(m *model.JobPosting) JobPostingResponse {
 		})
 	}
 	dto.Tags = tags
+
+	if len(m.Applications) > 0 {
+		applications := make([]ApplicationResponse, 0, len(m.Applications))
+		for _, app := range m.Applications {
+			applicationDto := ApplicationToDto(&app)
+			applications = append(applications, applicationDto)
+		}
+		dto.Applications = applications
+	}
 
 	return dto
 }

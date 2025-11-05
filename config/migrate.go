@@ -25,6 +25,7 @@ func Migrate(db *gorm.DB) {
 		&model.FollowupMilestone{},
 		&model.FollowupIssue{},
 		&model.WeeklyCompanyMetrics{},
+		&model.Request{},
 	)
 
 	if err != nil {

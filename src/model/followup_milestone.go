@@ -17,6 +17,9 @@ type FollowupMilestone struct {
 	IntershipId uuid.UUID `gorm:"not null"`
 	Intership   Intership `gorm:"foreignKey:IntershipId;references:ID"`
 
+	CompanyProfileId uuid.UUID      `gorm:"not null"`
+	CompanyProfile   CompanyProfile `gorm:"foreignKey:CompanyProfileId;references:ID"`
+
 	FollowupIssues []FollowupIssue `gorm:"foreignKey:FollowupMilestoneId;references:ID"`
 
 	CreatedAt time.Time
