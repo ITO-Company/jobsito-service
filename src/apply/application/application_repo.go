@@ -14,6 +14,7 @@ type ApplicationRepo interface {
 	FindJobPostingById(id string) (*model.JobPosting, error)
 	FindAllByJobSeeker(jobSeekerID string, opts *helper.FindAllOptions) ([]model.Application, int64, error)
 	FindAllByJobPostingAndCompany(jobPostingID string, companyID string, opts *helper.FindAllOptions) ([]model.Application, int64, error)
+	FindAcceptedApplicationsByCompany(companyID string, opts *helper.FindAllOptions) ([]model.JobPosting, int64, error)
 }
 
 type Repo struct {
@@ -81,4 +82,21 @@ func (r *Repo) FindAllByJobPostingAndCompany(jobPostingID string, companyID stri
 	query, total := helper.ApplyFindAllOptions(query, opts)
 	err := query.Find(&applications).Error
 	return applications, total, err
+}
+
+func (r *Repo) FindAcceptedApplicationsByCompany(companyID string, opts *helper.FindAllOptions) ([]model.JobPosting, int64, error) {
+	var jobPostings []model.JobPosting
+	query := r.db.Model(&model.JobPosting{}).
+		Joins("JOIN applications ON applications.job_posting_id = job_postings.id AND applications.is_accepted = TRUE").
+		Where("job_postings.company_profile_id = ?", companyID).
+		Preload("Applications", "is_accepted = ?", true).
+		Preload("Applications.JobSeeker").
+		Group("job_postings.id")
+
+	opts.OrderBy = "job_postings.created_at"
+	opts.Sort = "asc"
+	query, total := helper.ApplyFindAllOptions(query, opts)
+
+	err := query.Find(&jobPostings).Error
+	return jobPostings, total, err
 }

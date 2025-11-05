@@ -31,6 +31,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 
 	applicationGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.Create)
 	applicationGroup.Patch("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
+	applicationGroup.Get("/accepted", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAcceptedApplicationsByCompany)
 	applicationGroup.Get("/job-seeker", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindAllByJobSeeker)
 	applicationGroup.Get("/job-posting/:job_posting_id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAllByJobPostingAndCompany)
 	applicationGroup.Get("/:id", h.FindById)
@@ -112,4 +113,17 @@ func (h *Handler) FindAllByJobPostingAndCompany(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(applications)
+}
+
+func (h *Handler) FindAcceptedApplicationsByCompany(c *fiber.Ctx) error {
+	opts := helper.NewFindAllOptionsFromQuery(c)
+	companyID := c.Locals("user_id").(string)
+
+	jobPostings, err := h.service.FindAcceptedApplicationsByCompany(opts, companyID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(jobPostings)
 }
