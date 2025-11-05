@@ -12,6 +12,7 @@ type FollowupMilestone struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey;"`
 	Title       string
 	Description string
+	DueDate     time.Time
 	Status      enum.StatusEnum
 
 	IntershipId uuid.UUID `gorm:"not null"`

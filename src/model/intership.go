@@ -10,8 +10,8 @@ import (
 
 type Intership struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey;"`
-	StartDate string
-	EndDate   string
+	StartDate time.Time
+	EndDate   time.Time
 	Status    enum.StatusEnum
 
 	JobPostingId uuid.UUID  `gorm:"not null"`
