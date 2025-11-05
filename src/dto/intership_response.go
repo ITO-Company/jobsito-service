@@ -9,10 +9,10 @@ import (
 
 type IntershipResponseDto struct {
 	ID             string          `json:"id"`
-	StartDate      string          `json:"start_date"`
-	EndDate        string          `json:"end_date"`
+	StartDate      time.Time       `json:"start_date"`
+	EndDate        time.Time       `json:"end_date"`
 	Status         string          `json:"status"`
-	CompanyProfile CompanyResponse `json:"company_profile"`
+	CompanyProfile CompanyResponse `json:"company_profile,omitempty"`
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`
 }

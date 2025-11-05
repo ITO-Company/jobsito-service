@@ -29,9 +29,9 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	intershipGroup.Use(middleware.JwtMiddleware())
 
 	intershipGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Create)
-	intershipGroup.Get("/:id", h.FindById)
 	intershipGroup.Get("/job-seeker", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindAllForJobSeeker)
 	intershipGroup.Get("/company", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAllForCompany)
+	intershipGroup.Get("/:id", h.FindById)
 }
 
 func (h *Handler) Create(c *fiber.Ctx) error {
