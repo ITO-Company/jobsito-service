@@ -44,7 +44,7 @@ func (r *Repo) FindMilestoneById(id string) (*model.FollowupMilestone, error) {
 
 func (r *Repo) FindAll(milestoneId string, opts *helper.FindAllOptions) ([]model.FollowupIssue, int64, error) {
 	var issues []model.FollowupIssue
-	query := r.db.Model(&model.FollowupIssue{}).Where("milestone_id = ?", milestoneId)
+	query := r.db.Model(&model.FollowupIssue{}).Where("followup_milestone_id = ?", milestoneId)
 
 	var total int64
 	query, total = helper.ApplyFindAllOptions(query, opts)

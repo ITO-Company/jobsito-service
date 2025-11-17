@@ -1,8 +1,10 @@
 package issue
 
 import (
+	"github.com/google/uuid"
 	"github.com/ito-company/jobsito-service/helper"
 	"github.com/ito-company/jobsito-service/src/dto"
+	"github.com/ito-company/jobsito-service/src/enum"
 	"github.com/ito-company/jobsito-service/src/model"
 	"github.com/jinzhu/copier"
 )
@@ -48,6 +50,8 @@ func (s *Service) Create(input IssueCreateDto) (*dto.IssueResponseDto, error) {
 
 	var issue model.FollowupIssue
 	copier.Copy(&issue, input)
+	issue.ID = uuid.New()
+	issue.Status = enum.StatusPending
 	issue.FollowupMilestoneId = milestone.ID
 	issue.FollowupMilestone = *milestone
 

@@ -42,7 +42,9 @@ func (h *Handler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	milestone, err := h.service.Create(dto)
+	id := c.Locals("user_id").(string)
+
+	milestone, err := h.service.Create(dto, id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -88,7 +90,8 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 	}
 
 	id := c.Params("id")
-	milestone, err := h.service.Update(id, dto)
+	userId := c.Locals("user_id").(string)
+	milestone, err := h.service.Update(id, dto, userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

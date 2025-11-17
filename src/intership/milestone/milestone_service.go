@@ -1,6 +1,8 @@
 package milestone
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/ito-company/jobsito-service/helper"
 	"github.com/ito-company/jobsito-service/src/dto"
@@ -10,10 +12,10 @@ import (
 )
 
 type MilestoneService interface {
-	Create(input MilestoneCreateDto) (*dto.MilestoneResponseDto, error)
+	Create(input MilestoneCreateDto, company_id string) (*dto.MilestoneResponseDto, error)
 	FindById(id string) (*dto.MilestoneResponseDto, error)
 	FindAll(intershipId string, opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.MilestoneResponseDto], error)
-	Update(id string, input MilestoneUpdateDto) (*dto.MilestoneResponseDto, error)
+	Update(id string, input MilestoneUpdateDto, userId string) (*dto.MilestoneResponseDto, error)
 }
 
 type Service struct {
@@ -42,8 +44,13 @@ func (s *Service) FindAll(intershipId string, opts *helper.FindAllOptions) (*hel
 	}, nil
 }
 
-func (s *Service) Create(input MilestoneCreateDto) (*dto.MilestoneResponseDto, error) {
+func (s *Service) Create(input MilestoneCreateDto, company_id string) (*dto.MilestoneResponseDto, error) {
 	intership, err := s.repo.FindIntershipById(input.IntershipId)
+	if err != nil {
+		return nil, err
+	}
+
+	company, err := s.repo.FindCompanyById(company_id)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +61,8 @@ func (s *Service) Create(input MilestoneCreateDto) (*dto.MilestoneResponseDto, e
 	milestone.IntershipId = intership.ID
 	milestone.Intership = *intership
 	milestone.Status = enum.StatusPending
+	milestone.CompanyProfileId = company.ID
+	milestone.CompanyProfile = *company
 
 	if err := s.repo.Create(&milestone); err != nil {
 		return nil, err
@@ -73,10 +82,19 @@ func (s *Service) FindById(id string) (*dto.MilestoneResponseDto, error) {
 	return &response, nil
 }
 
-func (s *Service) Update(id string, input MilestoneUpdateDto) (*dto.MilestoneResponseDto, error) {
+func (s *Service) Update(id string, input MilestoneUpdateDto, userId string) (*dto.MilestoneResponseDto, error) {
 	milestone, err := s.repo.FindById(id)
 	if err != nil {
 		return nil, err
+	}
+
+	company, err := s.repo.FindCompanyById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if milestone.CompanyProfileId != company.ID {
+		return nil, fmt.Errorf("can't edit another company milestone")
 	}
 
 	if err := copier.Copy(milestone, input); err != nil {
