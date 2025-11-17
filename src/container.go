@@ -3,6 +3,7 @@ package src
 import (
 	"github.com/ito-company/jobsito-service/config"
 	"github.com/ito-company/jobsito-service/src/apply/application"
+	savedjob "github.com/ito-company/jobsito-service/src/apply/saved_job"
 	"github.com/ito-company/jobsito-service/src/intership/intership"
 	"github.com/ito-company/jobsito-service/src/intership/issue"
 	"github.com/ito-company/jobsito-service/src/intership/milestone"
@@ -23,6 +24,7 @@ type Container struct {
 	MilestoneHandler   milestone.MilestoneHandler
 	IssueHandler       issue.IssueHandler
 	RequestHandler     request.RequestHandler
+	SavedJobHandler    savedjob.SavedJobHandler
 }
 
 func SetupContainer() *Container {
@@ -62,6 +64,10 @@ func SetupContainer() *Container {
 	requestService := request.NewService(requestRepo)
 	requestHandler := request.NewHandler(requestService)
 
+	savedJobRepo := savedjob.NewRepo(config.DB)
+	savedJobService := savedjob.NewService(savedJobRepo)
+	savedJobHandler := savedjob.NewHandler(savedJobService)
+
 	return &Container{
 		JobSeekerHandler:   handler,
 		CompanyHandler:     companyHandler,
@@ -72,5 +78,6 @@ func SetupContainer() *Container {
 		IntershipHandler:   intershipHandler,
 		ApplicationHandler: applicationHandler,
 		RequestHandler:     requestHandler,
+		SavedJobHandler:    savedJobHandler,
 	}
 }
