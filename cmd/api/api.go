@@ -21,6 +21,8 @@ func SetupApi(app *fiber.App, c *src.Container) {
 		c.IntershipHandler.RegisterRoutes,
 		c.MilestoneHandler.RegisterRoutes,
 		c.IssueHandler.RegisterRoutes,
+		c.RequestHandler.RegisterRoutes,
+		c.SavedJobHandler.RegisterRoutes,
 	}
 
 	for _, register := range handlers {
