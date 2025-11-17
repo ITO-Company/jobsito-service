@@ -6,6 +6,7 @@ import (
 	"github.com/ito-company/jobsito-service/src/intership/intership"
 	"github.com/ito-company/jobsito-service/src/intership/issue"
 	"github.com/ito-company/jobsito-service/src/intership/milestone"
+	"github.com/ito-company/jobsito-service/src/intership/request"
 	jobposting "github.com/ito-company/jobsito-service/src/offer/job_posting"
 	"github.com/ito-company/jobsito-service/src/profile/company"
 	globaltags "github.com/ito-company/jobsito-service/src/profile/global_tags"
@@ -21,6 +22,7 @@ type Container struct {
 	IntershipHandler   intership.IntershipHandler
 	MilestoneHandler   milestone.MilestoneHandler
 	IssueHandler       issue.IssueHandler
+	RequestHandler     request.RequestHandler
 }
 
 func SetupContainer() *Container {
@@ -56,6 +58,10 @@ func SetupContainer() *Container {
 	issueService := issue.NewService(issueRepo)
 	issueHandler := issue.NewHandler(issueService)
 
+	requestRepo := request.NewRepo(config.DB)
+	requestService := request.NewService(requestRepo)
+	requestHandler := request.NewHandler(requestService)
+
 	return &Container{
 		JobSeekerHandler:   handler,
 		CompanyHandler:     companyHandler,
@@ -65,5 +71,6 @@ func SetupContainer() *Container {
 		JobPostingHandler:  jobpostingHandler,
 		IntershipHandler:   intershipHandler,
 		ApplicationHandler: applicationHandler,
+		RequestHandler:     requestHandler,
 	}
 }
