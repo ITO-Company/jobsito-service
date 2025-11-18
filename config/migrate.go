@@ -14,17 +14,12 @@ func Migrate(db *gorm.DB) {
 		&model.JobSeekerProfile{},
 		&model.JobPosting{},
 		&model.Application{},
-		&model.ApplicationStatusHistory{},
 		&model.JobPostingTags{},
 		&model.JobSeekerTags{},
-		&model.DailyJobStats{},
-		&model.JobView{},
-		&model.ProfileView{},
 		&model.SavedJob{},
 		&model.Intership{},
 		&model.FollowupMilestone{},
 		&model.FollowupIssue{},
-		&model.WeeklyCompanyMetrics{},
 		&model.Request{},
 	)
 

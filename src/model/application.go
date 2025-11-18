@@ -22,8 +22,6 @@ type Application struct {
 	JobPostingId uuid.UUID  `gorm:"not null"`
 	JobPosting   JobPosting `gorm:"foreignKey:JobPostingId;references:ID"`
 
-	ApplicationStatusHistory []ApplicationStatusHistory `gorm:"foreignKey:ApplicationId;references:ID"`
-
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

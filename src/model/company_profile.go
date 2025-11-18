@@ -21,10 +21,9 @@ type CompanyProfile struct {
 	LogoUrl     string
 	IsVerified  bool
 
-	JobPostings          []JobPosting           `gorm:"foreignKey:CompanyProfileId;references:ID"`
-	Interships           []Intership            `gorm:"foreignKey:CompanyProfileId;references:ID"`
-	FollowupMilestones   []FollowupMilestone    `gorm:"foreignKey:CompanyProfileId;references:ID"`
-	WeeklyCompanyMetrics []WeeklyCompanyMetrics `gorm:"foreignKey:CompanyProfileId;references:ID"`
+	JobPostings        []JobPosting        `gorm:"foreignKey:CompanyProfileId;references:ID"`
+	Interships         []Intership         `gorm:"foreignKey:CompanyProfileId;references:ID"`
+	FollowupMilestones []FollowupMilestone `gorm:"foreignKey:CompanyProfileId;references:ID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
