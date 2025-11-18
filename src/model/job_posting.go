@@ -29,8 +29,6 @@ type JobPosting struct {
 	CompanyProfile   CompanyProfile `gorm:"foreignKey:CompanyProfileId;references:ID"`
 
 	Applications   []Application    `gorm:"foreignKey:JobPostingId;references:ID"`
-	DailyJobStats  []DailyJobStats  `gorm:"foreignKey:JobPostingId;references:ID"`
-	JobView        []JobView        `gorm:"foreignKey:JobPostingId;references:ID"`
 	Intership      []Intership      `gorm:"foreignKey:JobPostingId;references:ID"`
 	JobPostingTags []JobPostingTags `gorm:"foreignKey:JobPostingId;references:ID"`
 	SavedJob       []SavedJob       `gorm:"foreignKey:JobPostingId;references:ID"`

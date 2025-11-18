@@ -8,6 +8,7 @@ import (
 	"github.com/ito-company/jobsito-service/src/intership/issue"
 	"github.com/ito-company/jobsito-service/src/intership/milestone"
 	"github.com/ito-company/jobsito-service/src/intership/request"
+	"github.com/ito-company/jobsito-service/src/kpi"
 	jobposting "github.com/ito-company/jobsito-service/src/offer/job_posting"
 	"github.com/ito-company/jobsito-service/src/profile/company"
 	globaltags "github.com/ito-company/jobsito-service/src/profile/global_tags"
@@ -25,6 +26,7 @@ type Container struct {
 	IssueHandler       issue.IssueHandler
 	RequestHandler     request.RequestHandler
 	SavedJobHandler    savedjob.SavedJobHandler
+	KPIHandler         kpi.KPIHandler
 }
 
 func SetupContainer() *Container {
@@ -68,6 +70,21 @@ func SetupContainer() *Container {
 	savedJobService := savedjob.NewService(savedJobRepo)
 	savedJobHandler := savedjob.NewHandler(savedJobService)
 
+	// KPI initialization
+	milestoneKPIRepo := kpi.NewRepo(config.DB)
+	milestoneKPIService := kpi.NewMilestoneKPIService(milestoneKPIRepo)
+
+	issueKPIRepo := kpi.NewIssueKPIRepo(config.DB)
+	issueKPIService := kpi.NewIssueKPIService(issueKPIRepo)
+
+	requestKPIRepo := kpi.NewRequestKPIRepo(config.DB)
+	requestKPIService := kpi.NewRequestKPIService(requestKPIRepo)
+
+	conversionKPIRepo := kpi.NewConversionKPIRepo(config.DB)
+	conversionKPIService := kpi.NewConversionKPIService(conversionKPIRepo)
+
+	kpiHandler := kpi.NewHandler(milestoneKPIService, issueKPIService, requestKPIService, conversionKPIService)
+
 	return &Container{
 		JobSeekerHandler:   handler,
 		CompanyHandler:     companyHandler,
@@ -79,5 +96,6 @@ func SetupContainer() *Container {
 		ApplicationHandler: applicationHandler,
 		RequestHandler:     requestHandler,
 		SavedJobHandler:    savedJobHandler,
+		KPIHandler:         kpiHandler,
 	}
 }
