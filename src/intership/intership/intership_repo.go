@@ -29,7 +29,11 @@ func (r *Repo) Create(m model.Intership) error {
 
 func (r *Repo) FindById(id string) (*model.Intership, error) {
 	var intership model.Intership
-	if err := r.db.First(&intership, "id = ?", id).Error; err != nil {
+	if err := r.db.
+		Preload("JobPosting").
+		Preload("JobSeekerProfile").
+		Preload("CompanyProfile").
+		First(&intership, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &intership, nil
@@ -61,7 +65,10 @@ func (r *Repo) FindJobPostingById(id string) (*model.JobPosting, error) {
 
 func (r *Repo) FindAll(companyID string, jobSeekerID string, opts *helper.FindAllOptions) ([]model.Intership, int64, error) {
 	var interships []model.Intership
-	query := r.db.Model(&model.Intership{})
+	query := r.db.Model(&model.Intership{}).
+		Preload("JobPosting").
+		Preload("JobSeekerProfile").
+		Preload("CompanyProfile")
 
 	if companyID != "" {
 		query = query.Where("company_profile_id = ?", companyID)
