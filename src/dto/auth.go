@@ -11,3 +11,9 @@ type SigninDto struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type InternSigninDto struct {
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	InternshipId string `json:"internship_id"`
+}

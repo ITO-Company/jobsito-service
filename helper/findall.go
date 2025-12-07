@@ -26,7 +26,7 @@ func NewFindAllOptionsFromQuery(c *fiber.Ctx) *FindAllOptions {
 
 	return &FindAllOptions{
 		OrderBy:     c.Query("order_by", "created_at"),
-		Sort:        c.Query("sort", "asc"),
+		Sort:        c.Query("sort", "desc"),
 		Search:      c.Query("search", ""),
 		Limit:       uint(limit),
 		Offset:      uint(offset),
@@ -39,22 +39,27 @@ func ApplyFindAllOptions(query *gorm.DB, opts *FindAllOptions) (*gorm.DB, int64)
 	var total int64
 
 	if opts == nil {
+		query = query.Order("created_at asc")
 		query.Count(&total)
 		return query, total
 	}
+
+	orderBy := opts.OrderBy
+	if orderBy == "" {
+		orderBy = "created_at"
+	}
+
+	sort := "asc"
+	if opts.Sort == "desc" {
+		sort = "desc"
+	}
+
+	query = query.Order(orderBy + " " + sort)
 
 	if opts.OnlyDeleted {
 		query = query.Unscoped().Where("deleted_at IS NOT NULL")
 	} else if opts.ShowDeleted {
 		query = query.Unscoped() // trae todos
-	}
-
-	if opts.OrderBy != "" {
-		sort := "asc"
-		if opts.Sort == "desc" {
-			sort = "desc"
-		}
-		query = query.Order(opts.OrderBy + " " + sort)
 	}
 
 	if opts.Search != "" {

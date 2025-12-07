@@ -14,6 +14,7 @@ import (
 type JobSeekerService interface {
 	Signup(dto dto.SignupDto) (string, error)
 	Signin(dto dto.SigninDto) (string, error)
+	InternSignin(dto dto.InternSigninDto) (string, error)
 	Update(email string, input JobSeekerUpdateDto) (*dto.JobSeekerResponse, error)
 	FindByEmail(email string) (*dto.JobSeekerResponse, error)
 	FindById(id string) (*dto.JobSeekerResponse, error)
@@ -74,6 +75,34 @@ func (s *Service) Signin(dto dto.SigninDto) (string, error) {
 
 	if !helper.CheckPasswordHash(dto.Password, seeker.Password) {
 		return "", fmt.Errorf("incorrect credentials")
+	}
+
+	token, err := helper.GenerateJwt(seeker.ID.String(), seeker.Email, string(enum.RoleSeeker))
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (s *Service) InternSignin(dto dto.InternSigninDto) (string, error) {
+	seeker, err := s.repo.FindByEmail(dto.Email)
+	if err != nil {
+		return "", err
+	}
+
+	if !helper.CheckPasswordHash(dto.Password, seeker.Password) {
+		return "", fmt.Errorf("incorrect credentials")
+	}
+
+	// Verificar si el pasante está asignado a la pasantía
+	isInInternship, err := s.repo.IsJobSeekerInInternship(seeker.ID.String(), dto.InternshipId)
+	if err != nil {
+		return "", fmt.Errorf("error verifying internship: %w", err)
+	}
+
+	if !isInInternship {
+		return "", fmt.Errorf("you are not assigned to this internship")
 	}
 
 	token, err := helper.GenerateJwt(seeker.ID.String(), seeker.Email, string(enum.RoleSeeker))

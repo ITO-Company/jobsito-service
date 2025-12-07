@@ -105,6 +105,10 @@ func (r *Repo) FindAll(opts *helper.FindAllOptions, tagIDs []string, companyID s
 		query = query.Where("company_profile_id = ?", companyID)
 	}
 
+	if opts != nil && opts.OrderBy == "" {
+		opts.OrderBy = "job_postings.created_at"
+	}
+
 	var total int64
 	query, total = helper.ApplyFindAllOptions(query, opts)
 

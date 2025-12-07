@@ -12,6 +12,7 @@ type JobSeekerHandler interface {
 	RegisterRoutes(router fiber.Router)
 	Signup(c *fiber.Ctx) error
 	Signin(c *fiber.Ctx) error
+	InternSignin(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	FindByEmail(c *fiber.Ctx) error
 	FindById(c *fiber.Ctx) error
@@ -33,6 +34,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	jobSeekerGroup := router.Group("/job-seekers")
 	jobSeekerGroup.Post("/signup", h.Signup)
 	jobSeekerGroup.Post("/signin", h.Signin)
+	jobSeekerGroup.Post("/intern-signin", h.InternSignin)
 
 	jobSeekerGroup.Use(middleware.JwtMiddleware())
 	jobSeekerGroup.Post("/:tag_id", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.AddTagToJobSeeker)
@@ -75,6 +77,26 @@ func (h *Handler) Signin(c *fiber.Ctx) error {
 	token, err := h.service.Signin(dto)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"token": token,
+	})
+}
+
+func (h *Handler) InternSignin(c *fiber.Ctx) error {
+	var dto dto.InternSigninDto
+	if err := c.BodyParser(&dto); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+	}
+
+	token, err := h.service.InternSignin(dto)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}

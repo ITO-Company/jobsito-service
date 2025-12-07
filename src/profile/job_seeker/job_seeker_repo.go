@@ -18,6 +18,7 @@ type JobSeekerRepo interface {
 	FindAll(opts *helper.FindAllOptions) ([]model.JobSeekerProfile, int64, error)
 	AddTagToJobSeeker(jobSeekerId, tagId, proficiency string) error
 	RemoveTagFromJobSeeker(jobSeekerId, tagId string) error
+	IsJobSeekerInInternship(jobSeekerId, internshipId string) (bool, error)
 }
 
 type Repo struct {
@@ -93,4 +94,22 @@ func (r *Repo) AddTagToJobSeeker(jobSeekerId, tagId, proficiency string) error {
 func (r *Repo) RemoveTagFromJobSeeker(jobSeekerId, tagId string) error {
 	return r.db.Where("job_seeker_profile_id = ? AND global_tag_id = ?", jobSeekerId, tagId).
 		Delete(&model.JobSeekerTags{}).Error
+}
+
+func (r *Repo) IsJobSeekerInInternship(jobSeekerId, internshipId string) (bool, error) {
+	var internship model.Intership
+	err := r.db.
+		Where("id = ? AND job_seeker_profile_id = ?", internshipId, jobSeekerId).
+		First(&internship).
+		Error
+
+	if err == gorm.ErrRecordNotFound {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
