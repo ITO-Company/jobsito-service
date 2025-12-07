@@ -13,6 +13,8 @@ type IntershipHandler interface {
 	FindById(c *fiber.Ctx) error
 	FindAllForJobSeeker(c *fiber.Ctx) error
 	FindAllForCompany(c *fiber.Ctx) error
+	GetOverview(c *fiber.Ctx) error
+	GetOverviewList(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -26,12 +28,16 @@ func NewHandler(service IntershipService) IntershipHandler {
 func (h *Handler) RegisterRoutes(router fiber.Router) {
 	intershipGroup := router.Group("/interships")
 
+	intershipGroup.Get("/overview/list/cor", h.GetOverviewList)
+
 	intershipGroup.Use(middleware.JwtMiddleware())
 
 	intershipGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Create)
 	intershipGroup.Get("/job-seeker", middleware.RequireRoleMiddleware(string(enum.RoleSeeker)), h.FindAllForJobSeeker)
 	intershipGroup.Get("/company", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.FindAllForCompany)
+	intershipGroup.Get("/overview/list", h.GetOverviewList)
 	intershipGroup.Get("/:id", h.FindById)
+	intershipGroup.Get("/:id/overview", h.GetOverview)
 }
 
 func (h *Handler) Create(c *fiber.Ctx) error {
@@ -90,6 +96,33 @@ func (h *Handler) FindAllForCompany(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (h *Handler) GetOverview(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	overview, err := h.service.FindByIdWithOverview(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(overview)
+}
+
+func (h *Handler) GetOverviewList(c *fiber.Ctx) error {
+	userID := c.Locals("user_id")
+
+	userIDStr := userID.(string)
+	opts := helper.NewFindAllOptionsFromQuery(c)
+
+	response, err := h.service.FindAllWithOverview(userIDStr, "", opts)
+	if err == nil && response.Total > 0 {
+		return c.Status(fiber.StatusOK).JSON(response)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response)

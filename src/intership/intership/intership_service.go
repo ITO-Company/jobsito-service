@@ -13,6 +13,8 @@ type IntershipService interface {
 	Create(companyId string, input IntershipCreateDto) (*dto.IntershipResponseDto, error)
 	FindById(id string) (*dto.IntershipResponseDto, error)
 	FindAll(companyID string, jobSeekerID string, opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.IntershipResponseDto], error)
+	FindByIdWithOverview(id string) (*dto.IntershipOverviewDto, error)
+	FindAllWithOverview(companyID string, jobSeekerID string, opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.IntershipOverviewDto], error)
 }
 
 type Service struct {
@@ -78,6 +80,34 @@ func (s *Service) FindAll(companyID string, jobSeekerID string, opts *helper.Fin
 	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
 
 	return &helper.PaginatedResponse[dto.IntershipResponseDto]{
+		Data:   dtos,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
+}
+
+func (s *Service) FindByIdWithOverview(id string) (*dto.IntershipOverviewDto, error) {
+	intership, err := s.repo.FindByIdWithDetails(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.IntershipToOverview(intership)
+	return &response, nil
+}
+
+func (s *Service) FindAllWithOverview(companyID string, jobSeekerID string, opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.IntershipOverviewDto], error) {
+	interships, total, err := s.repo.FindAllWithDetails(companyID, jobSeekerID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := dto.IntershipToOverviewList(interships)
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
+
+	return &helper.PaginatedResponse[dto.IntershipOverviewDto]{
 		Data:   dtos,
 		Total:  total,
 		Limit:  opts.Limit,

@@ -13,6 +13,8 @@ type IntershipRepo interface {
 	FindJobSeekerById(id string) (*model.JobSeekerProfile, error)
 	FindJobPostingById(id string) (*model.JobPosting, error)
 	FindAll(companyID string, jobSeekerID string, opts *helper.FindAllOptions) ([]model.Intership, int64, error)
+	FindByIdWithDetails(id string) (*model.Intership, error)
+	FindAllWithDetails(companyID string, jobSeekerID string, opts *helper.FindAllOptions) ([]model.Intership, int64, error)
 }
 
 type Repo struct {
@@ -69,6 +71,43 @@ func (r *Repo) FindAll(companyID string, jobSeekerID string, opts *helper.FindAl
 		Preload("JobPosting").
 		Preload("JobSeekerProfile").
 		Preload("CompanyProfile")
+
+	if companyID != "" {
+		query = query.Where("company_profile_id = ?", companyID)
+	}
+
+	if jobSeekerID != "" {
+		query = query.Where("job_seeker_profile_id = ?", jobSeekerID)
+	}
+
+	var total int64
+	query, total = helper.ApplyFindAllOptions(query, opts)
+
+	err := query.Find(&interships).Error
+
+	return interships, total, err
+}
+
+func (r *Repo) FindByIdWithDetails(id string) (*model.Intership, error) {
+	var intership model.Intership
+	if err := r.db.
+		Preload("JobPosting").
+		Preload("JobSeekerProfile").
+		Preload("CompanyProfile").
+		Preload("Milestones.FollowupIssues.Requests").
+		First(&intership, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &intership, nil
+}
+
+func (r *Repo) FindAllWithDetails(companyID string, jobSeekerID string, opts *helper.FindAllOptions) ([]model.Intership, int64, error) {
+	var interships []model.Intership
+	query := r.db.Model(&model.Intership{}).
+		Preload("JobPosting").
+		Preload("JobSeekerProfile").
+		Preload("CompanyProfile").
+		Preload("Milestones.FollowupIssues.Requests")
 
 	if companyID != "" {
 		query = query.Where("company_profile_id = ?", companyID)
