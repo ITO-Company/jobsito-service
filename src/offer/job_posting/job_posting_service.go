@@ -19,6 +19,8 @@ type JobPostingService interface {
 	AuthorizeCompanyAction(companyId string, jobPostingId string) error
 	FindAll(opts *helper.FindAllOptions, tagIDs []string, companyID string) (*helper.PaginatedResponse[dto.JobPostingResponse], error)
 	FindById(id string) (*dto.JobPostingResponse, error)
+	FindAllWithApplications(companyID string) ([]model.JobPosting, error)
+	FindByIdWithApplications(id string) (*model.JobPosting, error)
 }
 
 type Service struct {
@@ -129,4 +131,12 @@ func (s *Service) FindById(id string) (*dto.JobPostingResponse, error) {
 
 	response := dto.JobPostingToDto(job)
 	return &response, nil
+}
+
+func (s *Service) FindAllWithApplications(companyID string) ([]model.JobPosting, error) {
+	return s.repo.FindAllWithApplications(companyID)
+}
+
+func (s *Service) FindByIdWithApplications(id string) (*model.JobPosting, error) {
+	return s.repo.FindByIdWithApplications(id)
 }

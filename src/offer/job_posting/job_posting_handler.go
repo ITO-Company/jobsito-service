@@ -18,14 +18,20 @@ type JobPostingHandler interface {
 	RemoveTagFromJobPosting(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
 	FindById(c *fiber.Ctx) error
+	GenerateJobPostingListPDF(c *fiber.Ctx) error
+	GenerateJobPostingDetailPDF(c *fiber.Ctx) error
 }
 
 type Handler struct {
-	service JobPostingService
+	service       JobPostingService
+	reportService JobPostingReportService
 }
 
 func NewHandler(service JobPostingService) JobPostingHandler {
-	return &Handler{service: service}
+	return &Handler{
+		service:       service,
+		reportService: NewJobPostingReportService(),
+	}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router) {
@@ -35,6 +41,8 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 
 	jobPostingGroup.Get("/", h.FindAll)
 	jobPostingGroup.Get("/:id", h.FindById)
+	jobPostingGroup.Get("/report/list", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.GenerateJobPostingListPDF)
+	jobPostingGroup.Get("/:id/report", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.GenerateJobPostingDetailPDF)
 	jobPostingGroup.Post("/", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Create)
 	jobPostingGroup.Patch("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.Update)
 	jobPostingGroup.Delete("/:id", middleware.RequireRoleMiddleware(string(enum.RoleCompany)), h.SoftDelete)
@@ -170,4 +178,58 @@ func (h *Handler) FindById(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(job)
+}
+
+func (h *Handler) GenerateJobPostingListPDF(c *fiber.Ctx) error {
+	companyID := c.Locals("user_id").(string)
+
+	// Get all job postings with applications for this company
+	jobs, err := h.service.FindAllWithApplications(companyID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	pdfBytes, err := h.reportService.GenerateJobPostingListPDF(jobs)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate PDF",
+		})
+	}
+
+	c.Set("Content-Type", "application/pdf")
+	c.Set("Content-Disposition", "attachment; filename=ofertas-trabajo.pdf")
+	return c.Send(pdfBytes)
+}
+
+func (h *Handler) GenerateJobPostingDetailPDF(c *fiber.Ctx) error {
+	jobPostingID := c.Params("id")
+	companyID := c.Locals("user_id").(string)
+
+	// Get full job posting with applications
+	fullJob, err := h.service.FindByIdWithApplications(jobPostingID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Job posting not found",
+		})
+	}
+
+	// Verify that the job posting belongs to the company
+	if fullJob.CompanyProfileId.String() != companyID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": "Unauthorized",
+		})
+	}
+
+	pdfBytes, err := h.reportService.GenerateJobPostingDetailPDF(fullJob)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate PDF",
+		})
+	}
+
+	c.Set("Content-Type", "application/pdf")
+	c.Set("Content-Disposition", "attachment; filename=oferta-"+jobPostingID+".pdf")
+	return c.Send(pdfBytes)
 }

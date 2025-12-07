@@ -1,5 +1,3 @@
-github.com/MetaDandy/cuent-ai-core v0.0.0-20250814010318-2ece4b9cb9a3 h1:fYw+Uw47kTkA+qGpNNyM4X3MvCbVbGlQKgSAuPnk66c=
-github.com/MetaDandy/cuent-ai-core v0.0.0-20250814010318-2ece4b9cb9a3/go.mod h1:Ae+Xzs6i4injPA8gqVGUzqCh1IvAVZtrcG0z+zZz0gk=
 github.com/andybalholm/brotli v1.2.0 h1:ukwgCxwYrmACq68yiUqwIWnGY0cTPox/M94sVwToPjQ=
 github.com/andybalholm/brotli v1.2.0/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -19,6 +19,8 @@ type JobPostingRepo interface {
 	FindAll(opts *helper.FindAllOptions, tagIDs []string, companyID string) ([]model.JobPosting, int64, error)
 	AddTagToJobPosting(jobPostingId, tagId string) error
 	RemoveTagFromJobPosting(jobPostingId, tagId string) error
+	FindAllWithApplications(companyID string) ([]model.JobPosting, error)
+	FindByIdWithApplications(id string) (*model.JobPosting, error)
 }
 
 type Repo struct {
@@ -143,4 +145,26 @@ func (r *Repo) AddTagToJobPosting(jobPostingId, tagId string) error {
 func (r *Repo) RemoveTagFromJobPosting(jobPostingId, tagId string) error {
 	return r.db.Where("job_posting_id = ? AND global_tag_id = ?", jobPostingId, tagId).
 		Delete(&model.JobPostingTags{}).Error
+}
+
+func (r *Repo) FindAllWithApplications(companyID string) ([]model.JobPosting, error) {
+	var jobs []model.JobPosting
+	err := r.db.
+		Preload("Applications").
+		Preload("Applications.JobSeeker").
+		Preload("CompanyProfile").
+		Where("company_profile_id = ?", companyID).
+		Find(&jobs).Error
+	return jobs, err
+}
+
+func (r *Repo) FindByIdWithApplications(id string) (*model.JobPosting, error) {
+	var job model.JobPosting
+	err := r.db.
+		Preload("Applications").
+		Preload("Applications.JobSeeker").
+		Preload("CompanyProfile").
+		Where("id = ?", id).
+		First(&job).Error
+	return &job, err
 }
