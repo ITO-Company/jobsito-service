@@ -17,6 +17,7 @@ type IntershipHandler interface {
 	GetOverviewList(c *fiber.Ctx) error
 	GetOverviewPDF(c *fiber.Ctx) error
 	GetOverviewListPDF(c *fiber.Ctx) error
+	GetDetailedPDF(c *fiber.Ctx) error
 }
 
 type Handler struct {
@@ -45,6 +46,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	intershipGroup.Get("/overview/list/pdf", h.GetOverviewListPDF)
 	intershipGroup.Get("/overview/list", h.GetOverviewList)
 	intershipGroup.Get("/:id/overview/pdf", h.GetOverviewPDF)
+	intershipGroup.Get("/:id/detailed/pdf", h.GetDetailedPDF)
 	intershipGroup.Get("/:id", h.FindById)
 	intershipGroup.Get("/:id/overview", h.GetOverview)
 }
@@ -201,5 +203,28 @@ func (h *Handler) GetOverviewListPDF(c *fiber.Ctx) error {
 
 	c.Set("Content-Type", "application/pdf")
 	c.Set("Content-Disposition", "attachment; filename=interships-list.pdf")
+	return c.Send(pdfBytes)
+}
+
+func (h *Handler) GetDetailedPDF(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	// Obtener la pasantía con todos los detalles (milestones, issues, requests)
+	intership, err := h.service.FindByIdWithDetails(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	pdfBytes, err := h.reportService.GenerateDetailedPDF(intership)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate detailed PDF",
+		})
+	}
+
+	c.Set("Content-Type", "application/pdf")
+	c.Set("Content-Disposition", "attachment; filename=intership-detailed-"+id+".pdf")
 	return c.Send(pdfBytes)
 }

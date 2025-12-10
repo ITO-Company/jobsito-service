@@ -15,6 +15,7 @@ type IntershipService interface {
 	FindAll(companyID string, jobSeekerID string, opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.IntershipResponseDto], error)
 	FindByIdWithOverview(id string) (*dto.IntershipOverviewDto, error)
 	FindAllWithOverview(companyID string, jobSeekerID string, opts *helper.FindAllOptions) (*helper.PaginatedResponse[dto.IntershipOverviewDto], error)
+	FindByIdWithDetails(id string) (*model.Intership, error)
 }
 
 type Service struct {
@@ -114,4 +115,13 @@ func (s *Service) FindAllWithOverview(companyID string, jobSeekerID string, opts
 		Offset: opts.Offset,
 		Pages:  pages,
 	}, nil
+}
+
+func (s *Service) FindByIdWithDetails(id string) (*model.Intership, error) {
+	intership, err := s.repo.FindByIdWithDetails(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return intership, nil
 }
