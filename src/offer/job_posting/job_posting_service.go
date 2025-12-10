@@ -112,6 +112,12 @@ func (s *Service) FindAll(opts *helper.FindAllOptions, tagIDs []string, companyI
 		return nil, err
 	}
 	dtos := dto.JobPostingToListDto(finded)
+	
+	// Cap the total to the limit (30 max records)
+	if total > int64(opts.Limit) {
+		total = int64(opts.Limit)
+	}
+	
 	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
 
 	return &helper.PaginatedResponse[dto.JobPostingResponse]{

@@ -24,7 +24,7 @@ func Load() {
 
 	Port = os.Getenv("PORT")
 	if Port == "" {
-		Port = "8000"
+		Port = "8001"
 	}
 
 	maxRetries := 10
